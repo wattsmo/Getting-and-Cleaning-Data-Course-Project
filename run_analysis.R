@@ -18,16 +18,22 @@ if (!file.exists(dirName)) {
 }
 
 # Read in the activity text labels to allow meaningful activity data
-# in the tidied datasets
+# in the tidied datasets, and convert to lower case
 activityfileName <- paste(dirName,"activity_labels.txt", sep="/")
 activity <- read.table(activityfileName, col.names=c("id","name"), stringsAsFactors=FALSE)
+# Convert to lower case
+activity$name <- tolower(activity$name)
 
 # Read in the measured feature text labels to allow meaningful feature column
 # names in tidied datasets
 featurefileName <- paste(dirName,"features.txt", sep="/")
 feature <- read.table(featurefileName, col.names=c("id","name"))
 # Remove "()" from the feature names as they are special characters in R
+# Subst "-" for "_" and convert to lower case
 feature$name <- gsub("\\(\\)", "", feature$name) 
+feature$name <- gsub("-", "_", feature$name)
+feature$name <- tolower(feature$name)
+
 
 
 # The function getData reads in a set of data and constructs a tidied dataset
@@ -43,7 +49,7 @@ feature$name <- gsub("\\(\\)", "", feature$name)
 # function output
 #   a tidied dataset containing the subject, activity and measures determined by filter
 
-getData <- function(set, dir, featureNames, activityNames, filter="-std-|-mean-") {
+getData <- function(set, dir, featureNames, activityNames, filter="_std_|_mean_") {
     
     # construct the file names for the 3 pieces of data to be read from file
     datafileName <- paste(dir,set,paste("X_", set,".txt", sep=""), sep="/")
@@ -73,7 +79,10 @@ trainData <- getData("train", dirName, feature$name, activity$name)
 data <- rbind(testData, trainData)
 
 # STEP 5: create a summary of the means of the selected features for each activity/subject
-meanSummary <- cast(melt(data, id=1:2), ... ~ variable, mean)
+meanSummary <- melt(data, id=1:2) %>%
+    group_by(subject, activity, variable) %>%
+    summarize(mean(value))
+colnames(meanSummary)[3:4] <- c("feature", "mean_value")
 
 # Write the summary data to file
 write.table(meanSummary, "./data/meanSummary.txt", row.names=FALSE)
