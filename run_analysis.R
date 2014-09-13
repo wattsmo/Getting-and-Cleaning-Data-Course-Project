@@ -21,8 +21,6 @@ if (!file.exists(dirName)) {
 # in the tidied datasets, and convert to lower case
 activityfileName <- paste(dirName,"activity_labels.txt", sep="/")
 activity <- read.table(activityfileName, col.names=c("id","name"), stringsAsFactors=FALSE)
-# Convert to lower case
-activity$name <- tolower(activity$name)
 
 # Read in the measured feature text labels to allow meaningful feature column
 # names in tidied datasets
@@ -32,7 +30,6 @@ feature <- read.table(featurefileName, col.names=c("id","name"))
 # Subst "-" for "_" and convert to lower case
 feature$name <- gsub("\\(\\)", "", feature$name) 
 feature$name <- gsub("-", "_", feature$name)
-feature$name <- tolower(feature$name)
 
 
 
