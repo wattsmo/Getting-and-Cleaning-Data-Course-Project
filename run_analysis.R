@@ -14,7 +14,7 @@ if (!file.exists(dirName)) {
     download.file(url, zipName, method="curl")
     download.date <- date()
     dput(x = download.date, file = timeStampFile)
-    unzip(zipfile, exdir="./data")
+    unzip(zipName, exdir="./data")
 }
 
 # Read in the activity text labels to allow meaningful activity data
